@@ -12,20 +12,6 @@ function getItemHashByName(name) {
     return def.model;
 }
 
-/* function getLootFromZone(zoneType, maxItems = 3) {
-    const chances = LootConfig.LootPercentChance[zoneType];
-    if (!chances) return [];
-    const shuffled = shuffleArray(Object.entries(chances));
-    const result = [];
-    for (const [item, chance] of shuffled) {
-        if (Math.random() * 100 <= chance) {
-            result.push(item);
-            if (result.length >= maxItems) break;
-        }
-    }
-    return result;
-}*/
-
 function getLootFromZone(zoneType, maxItems = 3) {
     const chances = LootConfig.LootPercentChance[zoneType] 
         || LootConfig.LootPercentChance[zoneType.toLowerCase()] 
@@ -66,13 +52,6 @@ function randomRotationZ() {
 
 // Crear loot point
 function createLootPoint(type, x, y, z) {
-    const blip = mp.blips.new(58, new mp.Vector3(x, y, z), {
-        name: type,
-        color: 3,
-        alpha: 255,
-        shortRange: false
-    });
-
     const colshape = mp.colshapes.newSphere(x, y, z, 1.5);
 
     ActiveLootPoints.set(colshape, {
@@ -87,13 +66,14 @@ function createLootPoint(type, x, y, z) {
 }
 
 function refreshLootPoint(shape, fullReset = false) {
+    // Si no es un punto de loot, se cancela
     if (!ActiveLootPoints.has(shape)) return;
+
     const lootData = ActiveLootPoints.get(shape);
-    const lootItems = getLootFromZone(lootData.type, 3);
 
     if (fullReset) {
-        //const lootItems = getLootFromZone(lootData.type, 3);
-        lootData.loot = lootItems;
+        const lootItems = getLootFromZone(lootData.type, 3); // Obtiene nuevos items según el tipo de loot
+        lootData.loot = lootItems; // Actualiza los items
         console.log(`🟡 Loot refrescado: ${lootItems}`);
     }
 
