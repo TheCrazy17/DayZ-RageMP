@@ -179,6 +179,17 @@
         row.classList.add("selected");
     });
 
+        
+    // Menú contextual con click derecho
+    row.addEventListener("contextmenu", (e) => {
+        //e.preventDefault(); // Evita menú por defecto
+        Array.from(grid.getElementsByClassName("gui-row")).forEach(r => r.classList.remove("selected"));
+        row.classList.add("selected");
+
+        // Abrir menú contextual
+        showContextMenu(e.clientX, e.clientY, name);
+    });
+    
     // 🔹 Guardar datos del item al arrastrar
     row.addEventListener("dragstart", e => {
         e.dataTransfer.setData("text/plain", JSON.stringify({ name, qty }));
