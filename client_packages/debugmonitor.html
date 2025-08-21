@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Debug Monitor estilo DayZ MTA</title>
+</head>
+<body>
+
+<script>
+    // Crear overlay
+    const debugOverlay = document.createElement("div");
+    debugOverlay.style.position = "absolute";
+    debugOverlay.style.top = "90px";
+    debugOverlay.style.right = "0px"; // esquina superior derecha
+    debugOverlay.style.backgroundColor = "rgba(0, 0, 0, 0.8)";
+    debugOverlay.style.color = "white"; // estilo DayZ
+    debugOverlay.style.padding = "10px 15px";
+    debugOverlay.style.fontFamily = "Tahoma, Verdana, Arial, sans-serif";
+    debugOverlay.style.fontSize = "13px";
+    debugOverlay.style.lineHeight = "1.0em";
+    debugOverlay.style.zIndex = "9999";
+    debugOverlay.style.display = "block"; // inicia oculto
+    document.body.appendChild(debugOverlay);
+
+    let debugActive = false;
+
+    // Toggle con F5
+    window.addEventListener("keydown", (e) => {
+        if (e.key === "F5") {
+            e.preventDefault();
+            debugActive = !debugActive;
+            debugOverlay.style.display = debugActive ? "block" : "none";
+        }
+    });
+
+    // Datos del jugador simulados
+    const playerStats = {
+        zombiesKilled: 0,
+        headshots: 0,
+        murders: 0,
+        banditsKilled: 0,
+        blood: 10000,
+        humanity: 2500
+    };
+
+    // Función para generar una línea con label y valor alineados
+function createStatLine(label, value) {
+    const line = document.createElement("div");
+    line.style.display = "flex";
+    line.style.justifyContent = "space-between";
+    line.style.width = "150px"; // ancho fijo para alinear bien
+    line.innerHTML = `<span>${label}</span><span>${value}</span>`;
+    return line;
+}
+
+    function updateStats() {
+        // Aquí podrías reemplazar con datos reales del servidor
+        playerStats.zombiesKilled += Math.floor(Math.random()*2); // simulación
+        playerStats.headshots += Math.floor(Math.random()*1);
+        playerStats.murders += Math.floor(Math.random()*1);
+        playerStats.banditsKilled += Math.floor(Math.random()*1);
+        playerStats.blood = Math.max(0, playerStats.blood + Math.floor(Math.random()*11-5));
+        playerStats.humanity = Math.max(0, playerStats.humanity + Math.floor(Math.random()*11-5));
+    }
+
+function updateDebug() {
+    if (debugActive) {
+        updateStats(); // actualizar stats
+        debugOverlay.innerHTML = ""; // limpiar
+
+        debugOverlay.appendChild(createStatLine("Zombies Killed:", playerStats.zombiesKilled));
+        debugOverlay.appendChild(createStatLine("Headshots:", playerStats.headshots));
+        debugOverlay.appendChild(createStatLine("Murders:", playerStats.murders));
+        debugOverlay.appendChild(createStatLine("Bandits Killed:", playerStats.banditsKilled));
+        debugOverlay.appendChild(createStatLine("Blood:", playerStats.blood));
+        debugOverlay.appendChild(createStatLine("Humanity:", playerStats.humanity));
+    }
+    requestAnimationFrame(updateDebug);
+}
+
+    updateDebug();
+</script>
+
+</body>
+</html>
