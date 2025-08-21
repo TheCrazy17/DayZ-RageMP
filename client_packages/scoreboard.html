@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Scoreboard estilo MTA</title>
+<style>
+  body { background:#111; margin:0; overflow:hidden; font-family:Arial, sans-serif; }
+
+  .gui-window { 
+    position:absolute; background:rgba(20,20,20,0.9); color:white; 
+    border:2px solid #555; border-radius:8px;
+    box-shadow:0 0 15px rgba(0,0,0,0.7); display:none;
+  }
+  .gui-title { background:#444; padding:5px; text-align:center; font-weight:bold; user-select:none; }
+
+  /* grid estilo tabla */
+  .gui-grid { display:table; width:100%; border-collapse:collapse; }
+  .gui-row { display:table-row; }
+  .gui-cell {
+    display:table-cell; padding:4px 8px; border-bottom:1px solid #333;
+    font-size:14px; text-align:center;
+  }
+  .gui-header .gui-cell {
+    font-weight:bold; background:#333;
+  }
+.gui-title {
+  display:flex;
+  align-items:center;
+  justify-content:center; /* centra el texto */
+  background:#444;
+  padding:5px;
+  position:relative;
+  font-weight:bold;
+  user-select:none;
+}
+
+.gui-title .key {
+  position:absolute;
+  left:8px;              /* pegado a la izquierda */
+  padding:2px 6px;
+  border:1px solid #aaa;
+  border-radius:4px;
+  background:#222;
+  font-size:12px;
+  font-family:monospace;
+  box-shadow:inset 0 -2px 0 rgba(0,0,0,0.4);
+}
+
+.gui-title .title-text {
+  font-size:14px;
+}
+</style>
+</head>
+<body>
+<div id="ui-root"></div>
+
+<script>
+function createWindow(x,y,w,title){
+  let win=document.createElement("div");
+  win.className="gui-window";
+  win.style.left=x+"px"; 
+  win.style.top=y+"px";
+  win.style.width=w+"px";
+
+    if(title){
+      let header=document.createElement("div");
+      header.className="gui-title";
+
+      // tecla Tab
+      let key=document.createElement("span");
+      key.className="key";
+      key.innerText="Tab";
+
+      // título centrado
+      let titleSpan=document.createElement("span");
+      titleSpan.className="title-text";
+      titleSpan.innerText=title;
+
+      header.appendChild(key);
+      header.appendChild(titleSpan);
+      win.appendChild(header);
+    }
+  document.getElementById("ui-root").appendChild(win);
+  return win;
+}
+
+function createGridList(parent, cols){
+  let grid=document.createElement("div");
+  grid.className="gui-grid";
+
+  // encabezado
+  let header=document.createElement("div");
+  header.className="gui-row gui-header";
+  cols.forEach(c=>{
+    let cell=document.createElement("div");
+    cell.className="gui-cell";
+    cell.style.width=c.width;
+    cell.innerText=c.name;
+    header.appendChild(cell);
+  });
+  grid.appendChild(header);
+
+  parent.appendChild(grid);
+  return grid;
+}
+
+function gridAddRow(grid, data){
+  let row=document.createElement("div");
+  row.className="gui-row";
+  data.forEach(text=>{
+    let cell=document.createElement("div");
+    cell.className="gui-cell";
+    cell.innerText=text;
+    row.appendChild(cell);
+  });
+  grid.appendChild(row);
+}
+
+function centerWindow(win){
+  let sw = window.innerWidth;
+  let sh = window.innerHeight;
+  let rect = win.getBoundingClientRect();
+  win.style.left = (sw/2 - rect.width/2)+"px";
+  win.style.top = (sh/2 - rect.height/2)+"px";
+}
+
+// ---------------- Scoreboard -----------------
+let sb=createWindow(0,0,600,"DayZ: Survival Instinct");
+
+// columnas
+let grid=createGridList(sb,[
+  {name:"ID", width:"40px"},
+  {name:"Jugador", width:"150px"},
+  {name:"Kills", width:"80px"},
+  {name:"Muertes", width:"80px"},
+  {name:"Tiempo vivo", width:"100px"},
+  {name:"Ping", width:"60px"},
+]);
+
+// datos de ejemplo
+gridAddRow(grid,["1","CrazyTech","15","4", "20:52","52"]);
+gridAddRow(grid,["2","Juan","7","12","00:05","101"]);
+gridAddRow(grid,["3","Bruno","25","9","00:01","87"]);
+
+// ajustar tamaño dinámico después de armar grid
+setTimeout(()=>centerWindow(sb),0);
+
+// toggle con TAB
+window.addEventListener("keydown",e=>{
+  if(e.key==="Tab"){
+    e.preventDefault();
+    let visible = getComputedStyle(sb).display!=="none";
+    sb.style.display=visible ? "none":"block";
+    if(!visible) centerWindow(sb); // recalc al mostrar
+  }
+});
+
+window.addEventListener("resize",()=>centerWindow(sb));
+</script>
+</body>
+</html>
