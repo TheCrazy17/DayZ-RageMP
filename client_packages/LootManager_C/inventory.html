@@ -10,20 +10,21 @@
     .gui-title { background:#444; padding:5px; text-align:center; font-weight:bold; cursor:move; user-select:none; }
     .gui-grid { padding:5px; overflow-y:auto; background:#333; }
 /* Fila del grid con dos columnas */
-.gui-row {
-    display: flex;
-    justify-content: space-between; /* nombre a la izquierda, cantidad a la derecha */
-    padding: 5px;
-    border-bottom: 1px solid #555;
-    cursor: pointer;
-}
-.gui-row span {
-    pointer-events: none; /* para que no interfiera con el click */
-}
+      .gui-row {
+          display: flex;
+          justify-content: space-between; /* nombre a la izquierda, cantidad a la derecha */
+          padding: 5px;
+          border-bottom: 1px solid #555;
+          cursor: pointer;
+          font-size: 13px;
+      }
+    .gui-row span {
+        pointer-events: none; /* para que no interfiera con el click */
+    }
     .gui-row:hover { background:#555; }
     .gui-row.selected { background:#69d35fd2; color:#303030; }
     .gui-category { padding:5px; margin-top:6px; background:#222; font-weight:bold; color:#67ff53;
-                    border-bottom:2px solid #777; user-select:none; }
+                    border-bottom:2px solid #777; user-select:none; font-size: 12px;}
     /* Menú contextual */
     .context-menu { position:absolute; color: rgb(150, 150, 150); background:#222; border:1px solid #555; border-radius:5px;
                     box-shadow:0 0 10px rgba(72, 255, 0, 0.4); display:none; z-index:9999; }
@@ -189,7 +190,7 @@
         // Abrir menú contextual
         showContextMenu(e.clientX, e.clientY, name);
     });
-    
+
     // 🔹 Guardar datos del item al arrastrar
     row.addEventListener("dragstart", e => {
         e.dataTransfer.setData("text/plain", JSON.stringify({ name, qty }));
@@ -309,6 +310,34 @@ function enableDrop(grid, type) {
     gridListAddCategory(grid2,"Armas Secundarias");
     gridListAddCategory(grid2,"Armas Especiales");
     gridListAddCategory(grid2,"Medicina");
+    gridListAddRow(grid2,"Lata de frijoles", "2");
+    gridListAddRow(grid2,"Lata de frijoles", "2");
+    gridListAddRow(grid2,"Lata de frijoles", "2");
+    gridListAddRow(grid2,"Lata de frijoles", "2");
+    gridListAddRow(grid2,"Lata de frijoles", "2");
+    gridListAddRow(grid2,"Lata de frijoles", "2");
+    gridListAddRow(grid2,"Lata de frijoles", "2");
+    gridListAddRow(grid2,"Lata de frijoles", "2");
+    gridListAddRow(grid2,"Lata de frijoles", "2");
+    gridListAddRow(grid2,"Lata de frijoles", "2");
+    gridListAddRow(grid2,"Lata de frijoles", "2");
+    gridListAddRow(grid2,"Lata de frijoles", "2");
+    gridListAddRow(grid2,"Lata de frijoles", "2");
+    gridListAddRow(grid2,"Lata de frijoles", "2");
+    gridListAddRow(grid2,"Lata de frijoles", "2");
+    gridListAddRow(grid2,"Lata de frijoles", "2");
+    gridListAddRow(grid2,"Lata de frijoles", "2");
+    gridListAddRow(grid2,"Lata de frijoles", "2");
+    gridListAddRow(grid2,"Lata de frijoles", "2");
+    gridListAddRow(grid2,"Lata de frijoles", "2");
+    gridListAddRow(grid2,"Lata de frijoles", "2");
+    gridListAddRow(grid2,"Lata de frijoles", "2");
+    gridListAddRow(grid2,"Lata de frijoles", "2");
+    gridListAddRow(grid2,"Lata de frijoles", "2");
+    gridListAddRow(grid2,"Lata de frijoles", "2");
+    gridListAddRow(grid2,"Lata de frijoles", "2");
+    gridListAddRow(grid2,"Lata de frijoles", "2");
+    gridListAddRow(grid2,"Lata de frijoles", "2");
 
 // Botón dentro del inventario
   createButton(invWindow, "<", 375, 40, 30, 315, () => {
