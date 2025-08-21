@@ -46,3 +46,13 @@ mp.events.add('render', () => {
         }
     });
 });
+
+speedometerWindow = mp.browsers.new("package://LootManager_C/inventory.html");
+showing = false
+
+mp.keys.bind(0x4A, false, () => { // F2 para togglear debug
+    showing = !showing;
+
+    speedometerWindow.call("showInventory", showing);
+    mp.gui.cursor.show(showing, showing); //Disables the players controls and shows the cursor
+});

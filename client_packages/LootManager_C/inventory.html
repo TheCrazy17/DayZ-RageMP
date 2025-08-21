@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <title>Inventario con menú contextual</title>
   <style>
-    body { background:#111; margin:0; overflow:hidden; font-family:Arial, sans-serif; }
+    body { background:#11111100; margin:0; overflow:hidden; font-family:Arial, sans-serif; }
     .gui-window { position:absolute; background:#222; color:white; border:2px solid #555; border-radius:8px;
                   box-shadow:0 0 15px rgba(0,0,0,0.7); display:none; }
     .gui-title { background:#444; padding:5px; text-align:center; font-weight:bold; cursor:move; user-select:none; }
@@ -409,13 +409,17 @@ window.addEventListener("keydown", e => {
     e.preventDefault();
   });
     // Toggle con J
-    window.addEventListener("keydown",e=>{
+    mp.events.add('showInventory', (state) => {
+        invWindow.style.display = state ? "block" : "none";
+    });
+    
+    /*window.addEventListener("keydown",e=>{
       if(e.key.toLowerCase()==="j"){
         let visible = getComputedStyle(invWindow).display !== "none";
         invWindow.style.display = visible ? "none" : "block";
         ctx.style.display = "none";
       }
-    });
+    });*/
 
     /*document.body.addEventListener("dragover",e=>e.preventDefault());
     document.body.addEventListener("drop",e=>{

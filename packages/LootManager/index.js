@@ -56,7 +56,6 @@ function createLootPoint(type, x, y, z) {
 
     ActiveLootPoints.set(colshape, {
         type,
-        blip,
         loot: [],
         coords: { x, y, z }
     });
@@ -82,7 +81,7 @@ function refreshLootPoint(shape, fullReset = false) {
 
     const spawnedObjects = [];
 
-    lootItems.forEach(item => {
+    lootData.loot.forEach(item => {
         const model = getItemHashByName(item);
             const obj = mp.objects.new(
                 model,
