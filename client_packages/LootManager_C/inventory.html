@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Inventario con menú contextual</title>
+  <style>
+    body { background:#111; margin:0; overflow:hidden; font-family:Arial, sans-serif; }
+    .gui-window { position:absolute; background:#222; color:white; border:2px solid #555; border-radius:8px;
+                  box-shadow:0 0 15px rgba(0,0,0,0.7); display:none; }
+    .gui-title { background:#444; padding:5px; text-align:center; font-weight:bold; cursor:move; user-select:none; }
+    .gui-grid { padding:5px; overflow-y:auto; background:#333; }
+/* Fila del grid con dos columnas */
+.gui-row {
+    display: flex;
+    justify-content: space-between; /* nombre a la izquierda, cantidad a la derecha */
+    padding: 5px;
+    border-bottom: 1px solid #555;
+    cursor: pointer;
+}
+.gui-row span {
+    pointer-events: none; /* para que no interfiera con el click */
+}
+    .gui-row:hover { background:#555; }
+    .gui-row.selected { background:#69d35fd2; color:#303030; }
+    .gui-category { padding:5px; margin-top:6px; background:#222; font-weight:bold; color:#67ff53;
+                    border-bottom:2px solid #777; user-select:none; }
+    /* Menú contextual */
+    .context-menu { position:absolute; color: rgb(150, 150, 150); background:#222; border:1px solid #555; border-radius:5px;
+                    box-shadow:0 0 10px rgba(72, 255, 0, 0.4); display:none; z-index:9999; }
+    .context-item { padding:6px 12px; cursor:pointer; white-space:nowrap; }
+    .context-item:hover { background:#555; color: rgb(255, 255, 255); }
+/* Botones */
+.gui-button {
+  background:#555;
+  border:none;
+  color:white;
+  cursor:pointer;
+  border-radius:4px;
+  /* ya no usamos width:100%, será definido por JS */
+  display:flex;
+  justify-content:center;
+  align-items:center;
+}
+
+.gui-button:hover { background:#777; }
+.gui-label {
+    color: white;
+    font-size: 14px;
+    user-select: none;
+    font-family: "Arial", "Helvetica", sans-serif; /* similar a la default de MTA */
+}
+  </style>
+</head>
+<body>
+  <div id="ui-root"></div>
+  <div id="contextMenu" class="context-menu"></div>
+
+  <script>
+    // ----- API estilo MTA -----
+    function createWindow(x,y,w,h,title){
+      let win=document.createElement("div");
+      win.className="gui-window";
+      win.style.left=x+"px"; win.style.top=y+"px"; win.style.width=w+"px"; win.style.height=h+"px";
+
+      let header=document.createElement("div");
+      header.className="gui-title";
+      header.innerText=title;
+      win.appendChild(header);
+
+      document.getElementById("ui-root").appendChild(win);
+
+      // Drag
+      let offX, offY, drag=false;
+      header.addEventListener("mousedown",e=>{drag=true;offX=e.clientX-win.offsetLeft;offY=e.clientY-win.offsetTop;});
+      document.addEventListener("mouseup",()=>drag=false);
+      document.addEventListener("mousemove",e=>{
+        if(drag){win.style.left=(e.clientX-offX)+"px";win.style.top=(e.clientY-offY)+"px";}
+      });
+
+      return win;
+    }
+    function createButton(parent, text, x, y, w, h, onClick) {
+        let btn = document.createElement("button");
+        btn.className = "gui-button";
+        btn.innerText = text;
+        btn.style.position = "absolute";      // Posicionamiento absoluto
+        btn.style.left = x + "px";
+        btn.style.top = y + "px";
+        btn.style.width = w + "px";
+        btn.style.height = h + "px";
+        btn.onclick = onClick;
+        parent.appendChild(btn);
+        return btn;
+    }
+    function createLabel(parent, text, x, y, w, h, options={}) {
+    let label = document.createElement("div");
+    label.className = "gui-label";
+    label.innerText = text;
+    label.style.position = "absolute";
+    label.style.left = x + "px";
+    label.style.top = y + "px";
+    if (w) label.style.width = w + "px";
+    if (h) label.style.height = h + "px";
+
+    // Opciones de estilo adicionales
+    if (options.color) label.style.color = options.color;
+    if (options.background) label.style.background = options.background;
+    if (options.fontSize) label.style.fontSize = options.fontSize + "px";
+    if (options.textAlign) label.style.textAlign = options.textAlign;
+    if (options.padding) label.style.padding = options.padding + "px";
+
+    parent.appendChild(label);
+    return label;
+}
+    function createGridList(parent,x, y, w, h){
+      let grid=document.createElement("div");
+      grid.className="gui-grid";
+      //grid.style.width=w+"px"; grid.style.height=h+"px";
+        grid.style.position = "absolute";      // Posicionamiento absoluto
+        grid.style.left = x + "px";
+        grid.style.top = y + "px";
+        grid.style.width = w + "px";
+        grid.style.height = h + "px";
+      parent.appendChild(grid);
+      return grid;
+    }
+  /*function gridListAddRow(grid, name, qty) {
+    let row = document.createElement("div");
+    row.className = "gui-row";
+
+    let nameSpan = document.createElement("span");
+    nameSpan.innerText = name;
+    row.appendChild(nameSpan);
+
+    let qtySpan = document.createElement("span");
+    qtySpan.innerText = qty;  // cantidad
+    row.appendChild(qtySpan);
+
+    grid.appendChild(row);
+
+    // manejo de selección
+    row.addEventListener("click", () => {
+        Array.from(grid.getElementsByClassName("gui-row")).forEach(r => r.classList.remove("selected"));
+        row.classList.add("selected");
+    });
+
+    
+    // Menú contextual con click derecho
+    row.addEventListener("contextmenu", (e) => {
+        //e.preventDefault(); // Evita menú por defecto
+        Array.from(grid.getElementsByClassName("gui-row")).forEach(r => r.classList.remove("selected"));
+        row.classList.add("selected");
+
+        // Abrir menú contextual
+        showContextMenu(e.clientX, e.clientY, name);
+    });
+  
+    return row;
+}*/
+
+    function gridListAddRow(grid, name, qty) {
+    let row = document.createElement("div");
+    row.className = "gui-row";
+    row.draggable = true; // 🔹 Se puede arrastrar
+
+    let nameSpan = document.createElement("span");
+    nameSpan.innerText = name;
+    row.appendChild(nameSpan);
+
+    let qtySpan = document.createElement("span");
+    qtySpan.innerText = qty;
+    row.appendChild(qtySpan);
+
+    grid.appendChild(row);
+
+    // manejo de selección con click
+    row.addEventListener("click", () => {
+        Array.from(grid.getElementsByClassName("gui-row")).forEach(r => r.classList.remove("selected"));
+        row.classList.add("selected");
+    });
+
+    // 🔹 Guardar datos del item al arrastrar
+    row.addEventListener("dragstart", e => {
+        e.dataTransfer.setData("text/plain", JSON.stringify({ name, qty }));
+    });
+
+    return row;
+}
+
+function enableDrop(grid, type) {
+    grid.addEventListener("dragover", e => {
+        e.preventDefault(); // necesario para permitir drop
+    });
+
+    grid.addEventListener("drop", e => {
+        e.preventDefault();
+        let data = JSON.parse(e.dataTransfer.getData("text/plain"));
+        
+        if(type === "loot"){
+            alert("Item '" + data.name + "' se movió al loot!");
+            // acá podrías llamar a tu backend / lógica para mover al loot
+        } else if(type === "inventory"){
+            alert("Item '" + data.name + "' se movió al inventario!");
+            // acá lo mueves al inventario
+        }
+    });
+}
+
+    function gridListAddCategory(grid,text){
+      let cat=document.createElement("div");
+      cat.className="gui-category";
+      cat.innerText=text;
+      grid.appendChild(cat);
+      return cat;
+    }
+    
+    /*function gridListGetSelectedItem(grid){
+      let selected=grid.querySelector(".gui-row.selected");
+      return selected ? selected.innerText : null;
+    }*/
+
+    function gridListGetSelectedItem(grid){
+        let selected = grid.querySelector(".gui-row.selected");
+        if(selected){
+            // Primer span = nombre del ítem
+            return selected.querySelector("span").innerText;
+        }
+        return null;
+    }
+
+    // ----- Context Menu -----
+    const ctx=document.getElementById("contextMenu");
+    function showContextMenu(x,y,itemText){
+      ctx.innerHTML=""; // limpiar menú
+
+      // Opciones diferentes según item
+      let options=[];
+      if(itemText.includes("Rifle")||itemText.includes("Escopeta")||itemText.includes("Pistola")){
+        options=["Equipar","Soltar"];
+      } else if(itemText.includes("Agua")||itemText.includes("Lata")||itemText.includes("Comida")){
+        options=["Consumir","Soltar"];
+      } else if(itemText.includes("Botiquín")||itemText.includes("Analgésicos")){
+        options=["Usar","Soltar"];
+      } else {
+        options=["Inspeccionar","Soltar"];
+      }
+
+      options.forEach(opt=>{
+        let div=document.createElement("div");
+        div.className="context-item";
+        div.innerText=opt;
+        div.onclick=()=>{
+          alert(opt+" → "+itemText);
+          ctx.style.display="none";
+        };
+        ctx.appendChild(div);
+      });
+
+      ctx.style.left=x+"px"; ctx.style.top=y+"px";
+      ctx.style.display="block";
+    }
+
+    // Ocultar menú al hacer click afuera
+    document.addEventListener("click",()=>ctx.style.display="none");
+
+    // ----- Inventario -----
+    let invWindow=createWindow(300,100,700,450,"Inventario");
+    let grid=createGridList(invWindow,420, 40, 250,355);
+    
+
+    createLabel(invWindow, "Slots: 0/0", 10, 420, 260, 20, {fontSize:14, textAlign:"center"});
+    createLabel(invWindow, "Slots: 9/16", 420, 420, 250, 20, {fontSize:14, textAlign:"center"});
+  
+    gridListAddCategory(grid,"Armas Primarias");
+    gridListAddRow(grid,"Rifle de asalto", "1");
+    gridListAddRow(grid,"Escopeta", "2");
+
+    gridListAddCategory(grid,"Armas Secundarias");
+    gridListAddRow(grid,"Pistola", "1");
+
+    gridListAddCategory(grid,"Medicinas");
+    gridListAddRow(grid,"Botiquín", "9");
+    gridListAddRow(grid,"Analgésicos", "10");
+
+    gridListAddCategory(grid,"Comida y Agua");
+    gridListAddRow(grid,"Agua", "1");
+    gridListAddRow(grid,"Lata de frijoles", "2");
+    gridListAddRow(grid,"Lata de frijoles", "2");
+    gridListAddRow(grid,"Lata de frijoles", "2");
+    gridListAddRow(grid,"Lata de frijoles", "2");
+    gridListAddRow(grid,"Lata de frijoles", "2");
+    gridListAddRow(grid,"Lata de frijoles", "2");
+    gridListAddRow(grid,"Lata de frijoles", "2");
+
+    
+    let grid2=createGridList(invWindow,20, 40, 250,355);
+    gridListAddCategory(grid2,"Armas Primarias");
+    gridListAddCategory(grid2,"Armas Secundarias");
+    gridListAddCategory(grid2,"Armas Especiales");
+    gridListAddCategory(grid2,"Medicina");
+
+// Botón dentro del inventario
+  createButton(invWindow, "<", 375, 40, 30, 315, () => {
+    let item = gridListGetSelectedItem(grid);
+    if(item) alert("Usaste: " + item);
+  });
+
+  createButton(invWindow, "<<", 375, 365, 30, 40, () => {
+    let item = gridListGetSelectedItem(grid);
+    if(item) alert("Usaste: " + item);
+  });
+
+  // Botón dentro del inventario
+  createButton(invWindow, ">", 295, 40, 30, 315, () => {
+    let item = gridListGetSelectedItem(grid);
+    if(item) alert("Usaste: " + item);
+  });
+
+  createButton(invWindow, ">>", 295, 365, 30, 40, () => {
+    let item = gridListGetSelectedItem(grid);
+    if(item) alert("Usaste: " + item);
+  });
+
+  
+  enableDrop(grid, "inventory");
+  enableDrop(grid2, "loot");
+// Inventario de prueba
+let inventoryData = {
+    "Armas Primarias": [
+        { name: "M4A1", qty: 1 }
+    ],
+    "Armas Secundarias": [
+        { name: "Glock 17", qty: 1 }
+    ],
+    "Munición": [
+      { name: "Stanag MAG", qty: 60 }
+    ],
+    "Medicinas": [
+        { name: "Botiquín", qty: 9 },
+        { name: "Analgésicos", qty: 10 }
+    ],
+    "Comida y Agua": [
+    ]
+};
+
+// Función para refrescar el grid con los datos del inventario
+function refreshGrid(grid, data) {
+    // limpiar todo lo que tiene (rows y categorías)
+    grid.innerHTML = "";
+    ctx.style.display = "none";
+
+    // volver a crear categorías y filas
+    for (let category in data) {
+        gridListAddCategory(grid, category);
+        data[category].forEach(item => {
+            gridListAddRow(grid, item.name, item.qty);
+        });
+    }
+}
+
+// Ejemplo: refrescar inventario al apretar tecla "R"
+window.addEventListener("keydown", e => {
+    if (e.key.toLowerCase() === "r") {
+        refreshGrid(grid, inventoryData);
+    }
+});
+
+  document.addEventListener("contextmenu", (e) => {
+    e.preventDefault();
+  });
+    // Toggle con J
+    window.addEventListener("keydown",e=>{
+      if(e.key.toLowerCase()==="j"){
+        let visible = getComputedStyle(invWindow).display !== "none";
+        invWindow.style.display = visible ? "none" : "block";
+        ctx.style.display = "none";
+      }
+    });
+
+    /*document.body.addEventListener("dragover",e=>e.preventDefault());
+    document.body.addEventListener("drop",e=>{
+      e.preventDefault();
+      // si el drop no es dentro de la ventana de inventario => tirar al suelo
+      if(!e.target.closest(".gui-window")){
+        let data=JSON.parse(e.dataTransfer.getData("text/plain"));
+        alert("Item '"+data.name+"' se tiró al SUELO");
+      }
+    });*/
+
+    document.ondragover = e => e.preventDefault();
+        document.addEventListener("drop",e=>{
+        e.preventDefault();
+        // si el drop no es dentro de la ventana de inventario => tirar al suelo
+        if(!e.target.closest(".gui-window")){
+          let data=JSON.parse(e.dataTransfer.getData("text/plain"));
+          alert("Item '"+data.name+"' se tiró al SUELO");
+        }
+      });
+    //document.ondrop     = e => e.preventDefault();
+  </script>
+</body>
+</html>
