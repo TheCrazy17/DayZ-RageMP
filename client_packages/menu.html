@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Menu Contextual Loot</title>
+<style>
+    body {
+        margin: 0;
+        height: 100vh;
+        background: #11111100;
+        font-family: Tahoma, Verdana, Arial, sans-serif;
+        overflow: hidden;
+    }
+
+    #lootMenu {
+        position: absolute;
+        left: 0; /* desde el borde izquierdo de la pantalla */
+        top: 35%;
+        display: none;
+        flex-direction: column;
+        gap: 0px; /* menos separación entre botones */
+        z-index: 9999;
+        padding-left: 0px; /* opcional para que el texto no toque el borde */
+    }
+
+    .lootOption {
+        font-size: 12px;
+        background-color: rgba(0,0,0,0.8);
+        color: #fff;
+        padding: 2px 15px;
+        width: 140px; /* ancho del panel de fondo */
+        cursor: pointer;
+        text-align: left;
+        border-radius: 0 0px 0px 0; /* solo bordes derecho redondeados */
+        transition: all 0.2s;
+    }
+
+    .lootOption.selected, .lootOption:hover {
+        background-color: lime;
+        color: black;
+        transform: scale(1.05);
+    }
+</style>
+</head>
+<body>
+
+<script>
+const lootMenu = document.createElement("div");
+lootMenu.id = "lootMenu";
+lootMenu.style.display = "flex";
+document.body.appendChild(lootMenu);
+
+let currentIndex = 0;
+let currentOptions = []; // guardamos las opciones actuales
+
+function showLootMenu(options) {
+    lootMenu.innerHTML = "";
+    currentIndex = 0;
+    currentOptions = options;
+    options.forEach((opt, i) => {
+        const div = document.createElement("div");
+        div.className = "lootOption";
+        div.textContent = opt.label;
+        div.onclick = () => executeAction(i);
+        lootMenu.appendChild(div);
+    });
+    lootMenu.style.display = "flex";
+    updateSelection();
+}
+
+function hideLootMenu() {
+    lootMenu.style.display = "none";
+}
+
+function updateSelection() {
+    const items = lootMenu.querySelectorAll(".lootOption");
+    items.forEach((item, i) => {
+        item.classList.toggle("selected", i === currentIndex);
+    });
+}
+
+function executeAction(index) {
+    const opt = currentOptions[index];
+    if(!opt) return;
+    console.log("Acción seleccionada:", opt.label);
+    if(opt.callback) opt.callback();
+    hideLootMenu();
+}
+
+// Navegación con rueda del mouse
+document.addEventListener("wheel", e => {
+    if(lootMenu.style.display === "flex") {
+        const items = lootMenu.querySelectorAll(".lootOption");
+        if(e.deltaY < 0) currentIndex = (currentIndex - 1 + items.length) % items.length;
+        else currentIndex = (currentIndex + 1) % items.length;
+        updateSelection();
+    }
+});
+
+// Ejecutar acción con rueda central (botón del medio)
+document.addEventListener("mousedown", e => {
+    if(lootMenu.style.display === "flex" && e.button === 1) { // botón central
+        e.preventDefault(); // evita scroll
+        executeAction(currentIndex);
+    }
+});
+
+// Mostrar menú con tecla L
+document.addEventListener("keydown", e => {
+    if(e.key.toLowerCase() === "l") {
+        showLootMenu([
+            {label: "Abrir mochila"},
+            {label: "Sacar objeto"},
+            {label: "Examinar cadáver"},
+            {label: "Cerrar"}
+        ]);
+    }
+    if(e.key === "Escape") hideLootMenu();
+});
+</script>
+
+</body>
+</html>
