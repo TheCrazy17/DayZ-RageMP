@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Menu Inicio Estilo DayZ</title>
+    <!-- Fuente personalizada -->
+    <link href="https://fonts.googleapis.com/css2?family=Rubik+Dirt&display=swap" rel="stylesheet">
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            background: #00000000;
+            font-family: Tahoma, Verdana, Arial, sans-serif;
+        }
+
+        #menuOverlay {
+            position: absolute;
+            bottom: 50px;
+            left: 50px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .menuButton {
+            position: relative; /* necesario para pseudo-elemento */
+            font-family: 'Rubik Dirt', sans-serif;
+            width: 220px;
+            height: 50px;
+            padding: 0;
+            background-color: black;
+
+            /* Máscara de la imagen blanca */
+            -webkit-mask-image: url('button.png');
+            -webkit-mask-repeat: no-repeat;
+            -webkit-mask-position: center;
+            -webkit-mask-size: contain;
+            mask-image: url('button.png');
+            mask-repeat: no-repeat;
+            mask-position: center;
+            mask-size: contain;
+
+            color: #fff;
+            font-size: 20px;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border: none;
+            text-shadow: 1px 1px 2px #000, 0 0 5px rgba(0, 0, 0, 0.315); /* glow verde */
+            transition: background-color 0.3s ease, transform 0.2s ease;
+        }
+
+        .menuButton::after {
+            content: '';
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            pointer-events: none;
+            border-radius: 4px;
+            background: linear-gradient(120deg, rgba(255,255,255,0.05), rgba(0,255,0,0.05), rgba(255,255,255,0.05));
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .menuButton:hover {
+            background-color: rgba(82, 201, 46, 0.911); /* verde al pasar el mouse */
+            transform: translateY(-2px) scale(1.15); /* ligero movimiento y zoom */
+        }
+
+        .menuButton:hover::after {
+            opacity: 1; /* brillo animado */
+        }
+    </style>
+</head>
+<body>
+
+<script>
+    const menuOverlay = document.createElement("div");
+    menuOverlay.id = "menuOverlay";
+    document.body.appendChild(menuOverlay);
+
+    const menuOptions = ["Jugar", "Personaje", "Configuración", "Créditos"];
+
+    menuOptions.forEach(option => {
+        const btn = document.createElement("div");
+        btn.className = "menuButton";
+        btn.textContent = option;
+        btn.onclick = () => console.log(option + " presionado");
+        menuOverlay.appendChild(btn);
+    });
+
+    let menuActive = true;
+    function toggleMenu() {
+        menuActive = !menuActive;
+        menuOverlay.style.display = menuActive ? "flex" : "none";
+    }
+
+    window.addEventListener("keydown", (e) => {
+        if(e.key === "Escape") toggleMenu();
+    });
+</script>
+
+</body>
+</html>
