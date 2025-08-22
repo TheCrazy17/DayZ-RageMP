@@ -1,0 +1,50 @@
+body { background:#11111100; margin:0; overflow:hidden; font-family:Arial, sans-serif; }
+.gui-window { position:absolute; background:#222; color:white; border:2px solid #555; border-radius:8px;
+              box-shadow:0 0 15px rgba(0,0,0,0.7); display:none; }
+.gui-title { background:#444; padding:5px; text-align:center; font-weight:bold; cursor:move; user-select:none; }
+.gui-grid { padding:5px; overflow-y:auto; background:#333; }
+
+/* Fila del grid con dos columnas */
+.gui-row {
+    display: flex;
+    justify-content: space-between; /* nombre a la izquierda, cantidad a la derecha */
+    padding: 5px;
+    border-bottom: 1px solid #555;
+    cursor: pointer;
+    font-size: 13px;
+}
+
+.gui-row span {
+    pointer-events: none; /* para que no interfiera con el click */
+}
+
+.gui-row:hover { background:#555; }
+.gui-row.selected { background:#69d35fd2; color:#303030; }
+.gui-category { padding:5px; margin-top:6px; background:#222; font-weight:bold; color:#67ff53;
+                border-bottom:2px solid #777; user-select:none; font-size: 12px;}
+
+/* Menú contextual */
+.context-menu { position:absolute; color: rgb(150, 150, 150); background:#222; border:1px solid #555; border-radius:5px;
+                box-shadow:0 0 10px rgba(72, 255, 0, 0.4); display:none; z-index:9999; }
+.context-item { padding:6px 12px; cursor:pointer; white-space:nowrap; }
+.context-item:hover { background:#555; color: rgb(255, 255, 255); }
+
+/* Botones */
+.gui-button {
+    background:#555;
+    border:none;
+    color:white;
+    cursor:pointer;
+    border-radius:4px;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+}
+
+.gui-button:hover { background:#777; }
+.gui-label {
+    color: white;
+    font-size: 14px;
+    user-select: none;
+    font-family: "Arial", "Helvetica", sans-serif; /* similar a la default de MTA */
+}

@@ -47,7 +47,7 @@ mp.events.add('render', () => {
     });
 });
 
-speedometerWindow = mp.browsers.new("package://LootManager_C/inventory.html");
+speedometerWindow = mp.browsers.new("package://LootManager_C/html/inventory.html");
 showing = false
 
 mp.keys.bind(0x4A, false, () => { // F2 para togglear debug

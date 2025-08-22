@@ -1,62 +1,33 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-  <meta charset="UTF-8">
-  <title>Inventario con menú contextual</title>
-  <style>
-    body { background:#11111100; margin:0; overflow:hidden; font-family:Arial, sans-serif; }
-    .gui-window { position:absolute; background:#222; color:white; border:2px solid #555; border-radius:8px;
-                  box-shadow:0 0 15px rgba(0,0,0,0.7); display:none; }
-    .gui-title { background:#444; padding:5px; text-align:center; font-weight:bold; cursor:move; user-select:none; }
-    .gui-grid { padding:5px; overflow-y:auto; background:#333; }
-/* Fila del grid con dos columnas */
-      .gui-row {
-          display: flex;
-          justify-content: space-between; /* nombre a la izquierda, cantidad a la derecha */
-          padding: 5px;
-          border-bottom: 1px solid #555;
-          cursor: pointer;
-          font-size: 13px;
-      }
-    .gui-row span {
-        pointer-events: none; /* para que no interfiera con el click */
-    }
-    .gui-row:hover { background:#555; }
-    .gui-row.selected { background:#69d35fd2; color:#303030; }
-    .gui-category { padding:5px; margin-top:6px; background:#222; font-weight:bold; color:#67ff53;
-                    border-bottom:2px solid #777; user-select:none; font-size: 12px;}
-    /* Menú contextual */
-    .context-menu { position:absolute; color: rgb(150, 150, 150); background:#222; border:1px solid #555; border-radius:5px;
-                    box-shadow:0 0 10px rgba(72, 255, 0, 0.4); display:none; z-index:9999; }
-    .context-item { padding:6px 12px; cursor:pointer; white-space:nowrap; }
-    .context-item:hover { background:#555; color: rgb(255, 255, 255); }
-/* Botones */
-.gui-button {
-  background:#555;
-  border:none;
-  color:white;
-  cursor:pointer;
-  border-radius:4px;
-  /* ya no usamos width:100%, será definido por JS */
-  display:flex;
-  justify-content:center;
-  align-items:center;
-}
+let inventoryData2 = {
+  "Armas": [
+    { "name": "M1911", "type": "Pistola" },
+    { "name": "AK-47", "type": "Rifle" }
+  ],
+  "Municiones": [
+    { "name": "9mm Mag", "for": "M1911" },
+    { "name": "AK Mag", "for": "AK-47" }
+  ],
+  "Consumibles": [
+    { "name": "Lata de frijoles" },
+    { "name": "Agua" }
+  ],
+  "Medicinas": [
+    { "name": "Vendaje" },
+    { "name": "Morfina" }
+  ],
+  "Herramientas": [
+    { "name": "Mapa" },
+    { "name": "GPS" }
+  ],
+  "Autopartes": [
+    { "name": "Rueda" },
+    { "name": "Motor" }
+  ],
+  "Protección": [
+    { "name": "Mochila Alice Pack" }
+  ]
+};
 
-.gui-button:hover { background:#777; }
-.gui-label {
-    color: white;
-    font-size: 14px;
-    user-select: none;
-    font-family: "Arial", "Helvetica", sans-serif; /* similar a la default de MTA */
-}
-  </style>
-</head>
-<body>
-  <div id="ui-root"></div>
-  <div id="contextMenu" class="context-menu"></div>
-
-  <script>
     // ----- API estilo MTA -----
     function createWindow(x,y,w,h,title){
       let win=document.createElement("div");
@@ -441,6 +412,3 @@ window.addEventListener("keydown", e => {
         }
       });
     //document.ondrop     = e => e.preventDefault();
-  </script>
-</body>
-</html>
