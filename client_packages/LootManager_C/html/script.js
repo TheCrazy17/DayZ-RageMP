@@ -28,29 +28,30 @@ let inventoryData2 = {
   ]
 };
 
-    // ----- API estilo MTA -----
-    function createWindow(x,y,w,h,title){
-      let win=document.createElement("div");
-      win.className="gui-window";
-      win.style.left=x+"px"; win.style.top=y+"px"; win.style.width=w+"px"; win.style.height=h+"px";
+// ----- API estilo MTA -----
+function createWindow(x,y,w,h,title){
+    let win=document.createElement("div");
+    win.className="gui-window";
+    win.style.left=x+"px"; win.style.top=y+"px"; win.style.width=w+"px"; win.style.height=h+"px";
 
-      let header=document.createElement("div");
-      header.className="gui-title";
-      header.innerText=title;
-      win.appendChild(header);
+    let header=document.createElement("div");
+    header.className="gui-title";
+    header.innerText=title;
+    win.appendChild(header);
 
-      document.getElementById("ui-root").appendChild(win);
+    document.getElementById("ui-root").appendChild(win);
 
-      // Drag
-      let offX, offY, drag=false;
-      header.addEventListener("mousedown",e=>{drag=true;offX=e.clientX-win.offsetLeft;offY=e.clientY-win.offsetTop;});
-      document.addEventListener("mouseup",()=>drag=false);
-      document.addEventListener("mousemove",e=>{
-        if(drag){win.style.left=(e.clientX-offX)+"px";win.style.top=(e.clientY-offY)+"px";}
-      });
+    // Drag
+    let offX, offY, drag=false;
+    header.addEventListener("mousedown",e=>{drag=true;offX=e.clientX-win.offsetLeft;offY=e.clientY-win.offsetTop;});
+    document.addEventListener("mouseup",()=>drag=false);
+    document.addEventListener("mousemove",e=>{
+    	if(drag){win.style.left=(e.clientX-offX)+"px";win.style.top=(e.clientY-offY)+"px";}
+    });
 
-      return win;
-    }
+    return win;
+}
+
     function createButton(parent, text, x, y, w, h, onClick) {
         let btn = document.createElement("button");
         btn.className = "gui-button";
@@ -333,8 +334,9 @@ function enableDrop(grid, type) {
   });
 
   
-  enableDrop(grid, "inventory");
-  enableDrop(grid2, "loot");
+enableDrop(grid, "inventory");
+enableDrop(grid2, "loot");
+
 // Inventario de prueba
 let inventoryData = {
     "Armas Primarias": [
@@ -354,18 +356,29 @@ let inventoryData = {
     ]
 };
 
-// Función para refrescar el grid con los datos del inventario
 function refreshGrid(grid, data) {
     // limpiar todo lo que tiene (rows y categorías)
     grid.innerHTML = "";
     ctx.style.display = "none";
 
-    // volver a crear categorías y filas
-    for (let category in data) {
-        gridListAddCategory(grid, category);
-        data[category].forEach(item => {
-            gridListAddRow(grid, item.name, item.qty);
+    if (!data) return;
+
+    // 🔹 Si viene como string, lo parseamos
+    if (typeof data === "string") {
+        try {
+            data = JSON.parse(data);
+        } catch (e) {
+            console.error("Error parseando loot:", e, data);
+            return;
+        }
+    }
+
+    if (Array.isArray(data) && data.length > 0) {
+        data.forEach(itemName => {
+            gridListAddRow(grid, itemName, 1); // cantidad fija = 1
         });
+    } else {
+        gridListAddRow(grid, "Vacío", 0);
     }
 }
 
@@ -376,13 +389,19 @@ window.addEventListener("keydown", e => {
     }
 });
 
-  document.addEventListener("contextmenu", (e) => {
-    e.preventDefault();
-  });
-    // Toggle con J
-    mp.events.add('showInventory', (state) => {
-        invWindow.style.display = state ? "block" : "none";
-    });
+document.addEventListener("contextmenu", (e) => {
+	e.preventDefault();
+});
+
+// Toggle con J
+mp.events.add('showInventory', (state, loot) => {
+	invWindow.style.display = state ? "block" : "none";
+  refreshGrid(grid2, loot);
+});
+
+mp.events.add('refreshLootPoint', (LootData) => {
+	refreshGrid(grid2, LootData);
+});
     
     /*window.addEventListener("keydown",e=>{
       if(e.key.toLowerCase()==="j"){
@@ -402,13 +421,14 @@ window.addEventListener("keydown", e => {
       }
     });*/
 
-    document.ondragover = e => e.preventDefault();
-        document.addEventListener("drop",e=>{
-        e.preventDefault();
-        // si el drop no es dentro de la ventana de inventario => tirar al suelo
-        if(!e.target.closest(".gui-window")){
-          let data=JSON.parse(e.dataTransfer.getData("text/plain"));
-          alert("Item '"+data.name+"' se tiró al SUELO");
-        }
-      });
+document.ondragover = e => e.preventDefault();
+document.addEventListener("drop",e=>{
+    e.preventDefault();
+    // si el drop no es dentro de la ventana de inventario => tirar al suelo
+    if(!e.target.closest(".gui-window")){
+        let data=JSON.parse(e.dataTransfer.getData("text/plain"));
+        alert("Item '"+data.name+"' se tiró al SUELO");
+    }
+});
+
     //document.ondrop     = e => e.preventDefault();

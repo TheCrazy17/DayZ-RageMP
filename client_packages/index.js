@@ -1,0 +1,1 @@
+require("LootManager_C");

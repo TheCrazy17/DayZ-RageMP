@@ -50,9 +50,21 @@ mp.events.add('render', () => {
 speedometerWindow = mp.browsers.new("package://LootManager_C/html/inventory.html");
 showing = false
 
-mp.keys.bind(0x4A, false, () => { // F2 para togglear debug
+currentCol = null;
+
+mp.keys.bind(0x4A, false, () => {
     showing = !showing;
 
-    speedometerWindow.call("showInventory", showing);
+    let loot = null;
+    if (currentCol) {
+        loot = currentCol.getVariable("Loot");
+    }
+
+    speedometerWindow.call("showInventory", showing, loot);
     mp.gui.cursor.show(showing, showing); //Disables the players controls and shows the cursor
 });
+
+mp.events.addDataHandler('currentLoot', function (entity, value, oldValue) {
+    mp.gui.chat.push(`[CLIENTE] Cambio de currentLoot`);
+    currentCol = value;
+})

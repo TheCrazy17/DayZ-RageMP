@@ -77,7 +77,7 @@ function refreshLootPoint(shape, fullReset = false) {
     }
 
     // Guardamos los datos sincronizados
-    shape.setVariable("Loot", { loot: lootData.loot, coords: lootData.coords });
+    shape.setVariable("Loot", lootData.loot);
 
     const spawnedObjects = [];
 
@@ -115,22 +115,76 @@ function refreshAllLootPoints(fullReset = false) {
 mp.events.add("playerEnterColshape", (player, shape) => {
     const lootData = ActiveLootPoints.get(shape);
     if (!lootData) return;
+
     player.outputChatBox(`{00FF00}Has entrado a un punto de loot: ${lootData.loot}`);
+    player.setVariable('currentLoot', shape);
 });
 
 mp.events.add("playerExitColshape", (player, shape) => {
     const lootData = ActiveLootPoints.get(shape);
     if (!lootData) return;
+
     player.outputChatBox(`{FF0000}Has salido de un punto de loot.`);
+    player.setVariable('currentLoot', null);
 });
 
+// Comando para refrescar los puntos de loot
+// NOTA: Se debe restringir a los administradores
 mp.events.addCommand("refreshLoot", (player, _, arg) => {
     const force = arg && arg.toLowerCase() === "force";
     refreshAllLootPoints(force);
     player.outputChatBox(`{00FF00}🟢 Loot refrescado. Modo forzado: ${force}`);
 });
 
+// Escuchar el evento que viene desde cualquier cliente
+mp.events.add("takeLootItem", (player, itemName) => {
+    const shape = player.getVariable('currentLoot');
+    if (!shape || !ActiveLootPoints.has(shape)) {
+        //player.call("lootResponse", [false, "No estás en un punto de loot válido"]);
+        return;
+    }
+
+    const lootData = ActiveLootPoints.get(shape);
+
+    // Verificar que el ítem existe en este punto
+    const index = lootData.loot.indexOf(itemName);
+    if (index === -1) {
+        //player.call("lootResponse", [false, "Ese ítem ya fue tomado"]);
+        console.log(player.name + " intentó tomar un item inválido!");
+        return;
+    }
+
+    // Remover el ítem de la lista
+    lootData.loot.splice(index, 1);
+
+    // Destruir objeto visual
+    if (lootData.objects && lootData.objects[index]) {
+        lootData.objects[index].destroy();
+        lootData.objects.splice(index, 1);
+    }
+
+    // Guardar inventario del jugador (simple ejemplo)
+    if (!player.inventory) player.inventory = [];
+    player.inventory.push(itemName);
+
+    // Actualizar variables sincronizadas
+    shape.setVariable("Loot", lootData.loot);
+
+    ActiveLootPoints.set(shape, lootData);
+
+    // Confirmación al cliente
+    player.outputChatBox(`Has recogido: ${itemName}`);
+});
+
 // Crear loot militar desde config
 LootConfig.LootPoints.Militar.forEach(([x, y, z]) => {
     createLootPoint("Militar", x, y, z);
+});
+
+mp.events.addCommand("pos", (player) => {
+    const pos = player.position;
+    const rot = player.heading; // dirección de la cámara/personaje
+
+    player.outputChatBox(`{00FF00}Tu posición: X: ${pos.x.toFixed(2)} Y: ${pos.y.toFixed(2)} Z: ${pos.z.toFixed(2)} | Rot: ${rot.toFixed(2)}`);
+    console.log(`[Coords] ${player.name}: X:${pos.x}, Y:${pos.y}, Z:${pos.z}, Rot:${rot}`);
 });
