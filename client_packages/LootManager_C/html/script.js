@@ -1,31 +1,10 @@
-let inventoryData2 = {
-  "Armas": [
-    { "name": "M1911", "type": "Pistola" },
-    { "name": "AK-47", "type": "Rifle" }
-  ],
-  "Municiones": [
-    { "name": "9mm Mag", "for": "M1911" },
-    { "name": "AK Mag", "for": "AK-47" }
-  ],
-  "Consumibles": [
-    { "name": "Lata de frijoles" },
-    { "name": "Agua" }
-  ],
-  "Medicinas": [
-    { "name": "Vendaje" },
-    { "name": "Morfina" }
-  ],
-  "Herramientas": [
-    { "name": "Mapa" },
-    { "name": "GPS" }
-  ],
-  "Autopartes": [
-    { "name": "Rueda" },
-    { "name": "Motor" }
-  ],
-  "Protección": [
-    { "name": "Mochila Alice Pack" }
-  ]
+// Definición de categorías y sus ítems
+let inventoryCategory = {
+    "Armas primarias": ["Heavy Sniper", "Heavy Sniper Mk II", "Heavy Rifle", "Carbine Rifle Mk II"],
+    "Armas secundarias": ["Glock 17", "M1911"],
+    "Armas especiales": ["Grenade"],
+    "Municiones": ["9mm Mag", "AK Mag"],
+    "Consumibles": ["Lata de frijoles", "Agua"],
 };
 
 // ----- API estilo MTA -----
@@ -146,11 +125,11 @@ function createWindow(x,y,w,h,title){
 
     grid.appendChild(row);
 
-    // manejo de selección con click
-    row.addEventListener("click", () => {
-        Array.from(grid.getElementsByClassName("gui-row")).forEach(r => r.classList.remove("selected"));
-        row.classList.add("selected");
-    });
+// manejo de selección con click
+row.addEventListener("click", () => {
+	Array.from(grid.getElementsByClassName("gui-row")).forEach(r => r.classList.remove("selected"));
+	row.classList.add("selected");
+});
 
         
     // Menú contextual con click derecho
@@ -181,10 +160,10 @@ function enableDrop(grid, type) {
         let data = JSON.parse(e.dataTransfer.getData("text/plain"));
         
         if(type === "loot"){
-            alert("Item '" + data.name + "' se movió al loot!");
+            console.log("Item '" + data.name + "' se movió al loot!");
             // acá podrías llamar a tu backend / lógica para mover al loot
         } else if(type === "inventory"){
-            alert("Item '" + data.name + "' se movió al inventario!");
+            console.log("Item '" + data.name + "' se movió al inventario!");
             // acá lo mueves al inventario
         }
     });
@@ -234,7 +213,7 @@ function enableDrop(grid, type) {
         div.className="context-item";
         div.innerText=opt;
         div.onclick=()=>{
-          alert(opt+" → "+itemText);
+          console.log(opt+" → "+itemText);
           ctx.style.display="none";
         };
         ctx.appendChild(div);
@@ -283,54 +262,27 @@ function enableDrop(grid, type) {
     gridListAddCategory(grid2,"Armas Especiales");
     gridListAddCategory(grid2,"Medicina");
     gridListAddRow(grid2,"Lata de frijoles", "2");
-    gridListAddRow(grid2,"Lata de frijoles", "2");
-    gridListAddRow(grid2,"Lata de frijoles", "2");
-    gridListAddRow(grid2,"Lata de frijoles", "2");
-    gridListAddRow(grid2,"Lata de frijoles", "2");
-    gridListAddRow(grid2,"Lata de frijoles", "2");
-    gridListAddRow(grid2,"Lata de frijoles", "2");
-    gridListAddRow(grid2,"Lata de frijoles", "2");
-    gridListAddRow(grid2,"Lata de frijoles", "2");
-    gridListAddRow(grid2,"Lata de frijoles", "2");
-    gridListAddRow(grid2,"Lata de frijoles", "2");
-    gridListAddRow(grid2,"Lata de frijoles", "2");
-    gridListAddRow(grid2,"Lata de frijoles", "2");
-    gridListAddRow(grid2,"Lata de frijoles", "2");
-    gridListAddRow(grid2,"Lata de frijoles", "2");
-    gridListAddRow(grid2,"Lata de frijoles", "2");
-    gridListAddRow(grid2,"Lata de frijoles", "2");
-    gridListAddRow(grid2,"Lata de frijoles", "2");
-    gridListAddRow(grid2,"Lata de frijoles", "2");
-    gridListAddRow(grid2,"Lata de frijoles", "2");
-    gridListAddRow(grid2,"Lata de frijoles", "2");
-    gridListAddRow(grid2,"Lata de frijoles", "2");
-    gridListAddRow(grid2,"Lata de frijoles", "2");
-    gridListAddRow(grid2,"Lata de frijoles", "2");
-    gridListAddRow(grid2,"Lata de frijoles", "2");
-    gridListAddRow(grid2,"Lata de frijoles", "2");
-    gridListAddRow(grid2,"Lata de frijoles", "2");
-    gridListAddRow(grid2,"Lata de frijoles", "2");
 
 // Botón dentro del inventario
   createButton(invWindow, "<", 375, 40, 30, 315, () => {
     let item = gridListGetSelectedItem(grid);
-    if(item) alert("Usaste: " + item);
+    if(item) console.log("Usaste: " + item);
   });
 
   createButton(invWindow, "<<", 375, 365, 30, 40, () => {
     let item = gridListGetSelectedItem(grid);
-    if(item) alert("Usaste: " + item);
+    if(item) console.log("Usaste: " + item);
   });
 
-  // Botón dentro del inventario
-  createButton(invWindow, ">", 295, 40, 30, 315, () => {
-    let item = gridListGetSelectedItem(grid);
-    if(item) alert("Usaste: " + item);
-  });
+// Botón dentro del inventario
+createButton(invWindow, ">", 295, 40, 30, 315, () => {
+	let item = gridListGetSelectedItem(grid2);
+	if(item) mp.trigger('onClientTakeLoot', item);
+});
 
   createButton(invWindow, ">>", 295, 365, 30, 40, () => {
-    let item = gridListGetSelectedItem(grid);
-    if(item) alert("Usaste: " + item);
+    let item = gridListGetSelectedItem(grid2);
+    if(item) console.log("Usaste: " + item);
   });
 
   
@@ -356,14 +308,15 @@ let inventoryData = {
     ]
 };
 
-function refreshGrid(grid, data) {
+// Refrescar el grid del inventario
+function refreshGrid(grid, data = []) {
     // limpiar todo lo que tiene (rows y categorías)
     grid.innerHTML = "";
     ctx.style.display = "none";
 
     if (!data) return;
 
-    // 🔹 Si viene como string, lo parseamos
+    // 🔹 Si viene como string JSON, parseamos
     if (typeof data === "string") {
         try {
             data = JSON.parse(data);
@@ -373,19 +326,24 @@ function refreshGrid(grid, data) {
         }
     }
 
-    if (Array.isArray(data) && data.length > 0) {
-        data.forEach(itemName => {
-            gridListAddRow(grid, itemName, 1); // cantidad fija = 1
+    // 🔹 Recorremos categorías fijas
+    for (let category in inventoryCategory) {
+        // Agregar la categoría al grid
+        gridListAddCategory(grid, category);
+
+        // Revisar todos los ítems de esa categoría
+        inventoryCategory[category].forEach(itemName => {
+            if (data.includes(itemName)) {
+                gridListAddRow(grid, itemName, 1);
+            }
         });
-    } else {
-        gridListAddRow(grid, "Vacío", 0);
     }
 }
 
 // Ejemplo: refrescar inventario al apretar tecla "R"
 window.addEventListener("keydown", e => {
     if (e.key.toLowerCase() === "r") {
-        refreshGrid(grid, inventoryData);
+        refreshGrid(grid, []);
     }
 });
 
@@ -394,32 +352,13 @@ document.addEventListener("contextmenu", (e) => {
 });
 
 // Toggle con J
-mp.events.add('showInventory', (state, loot) => {
+mp.events.add('showInventory', (state) => {
 	invWindow.style.display = state ? "block" : "none";
-  refreshGrid(grid2, loot);
 });
 
 mp.events.add('refreshLootPoint', (LootData) => {
-	refreshGrid(grid2, LootData);
+  refreshGrid(grid2, LootData);
 });
-    
-    /*window.addEventListener("keydown",e=>{
-      if(e.key.toLowerCase()==="j"){
-        let visible = getComputedStyle(invWindow).display !== "none";
-        invWindow.style.display = visible ? "none" : "block";
-        ctx.style.display = "none";
-      }
-    });*/
-
-    /*document.body.addEventListener("dragover",e=>e.preventDefault());
-    document.body.addEventListener("drop",e=>{
-      e.preventDefault();
-      // si el drop no es dentro de la ventana de inventario => tirar al suelo
-      if(!e.target.closest(".gui-window")){
-        let data=JSON.parse(e.dataTransfer.getData("text/plain"));
-        alert("Item '"+data.name+"' se tiró al SUELO");
-      }
-    });*/
 
 document.ondragover = e => e.preventDefault();
 document.addEventListener("drop",e=>{
@@ -427,8 +366,6 @@ document.addEventListener("drop",e=>{
     // si el drop no es dentro de la ventana de inventario => tirar al suelo
     if(!e.target.closest(".gui-window")){
         let data=JSON.parse(e.dataTransfer.getData("text/plain"));
-        alert("Item '"+data.name+"' se tiró al SUELO");
+        console.log("Item '"+data.name+"' se tiró al SUELO");
     }
 });
-
-    //document.ondrop     = e => e.preventDefault();

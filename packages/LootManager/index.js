@@ -65,42 +65,49 @@ function createLootPoint(type, x, y, z) {
 }
 
 function refreshLootPoint(shape, fullReset = false) {
-    // Si no es un punto de loot, se cancela
     if (!ActiveLootPoints.has(shape)) return;
 
     const lootData = ActiveLootPoints.get(shape);
 
     if (fullReset) {
-        const lootItems = getLootFromZone(lootData.type, 3); // Obtiene nuevos items según el tipo de loot
-        lootData.loot = lootItems; // Actualiza los items
-        console.log(`🟡 Loot refrescado: ${lootItems}`);
+        // 🔹 Resetear arrays
+        lootData.loot = getLootFromZone(lootData.type, 3);
+
+        console.log(`🟡 Loot refrescado: ${lootData.loot}`);
     }
 
-    // Guardamos los datos sincronizados
+    // Guardar datos sincronizados
     shape.setVariable("Loot", lootData.loot);
+
+    // 🔹 Destruir objetos previos antes de regenerar
+    if (lootData.objects && lootData.objects.length > 0) {
+        lootData.objects.forEach(obj => {
+            if (obj) obj.destroy(); // no uses doesExist en server
+        });
+    }
+
 
     const spawnedObjects = [];
 
     lootData.loot.forEach(item => {
         const model = getItemHashByName(item);
-            const obj = mp.objects.new(
-                model,
-                new mp.Vector3(
-                    randomOffset(lootData.coords.x, 1),
-                    randomOffset(lootData.coords.y, 1),
-                    lootData.coords.z - 0.9
-                ),
-                {
-                    rotation: new mp.Vector3(0, 0, randomRotationZ()),
-                    alpha: 255,
-                    dimension: 0
-                }
-            );
-            spawnedObjects.push(obj);
-
-        lootData.objects = spawnedObjects;
+        const obj = mp.objects.new(
+            model,
+            new mp.Vector3(
+                randomOffset(lootData.coords.x, 1),
+                randomOffset(lootData.coords.y, 1),
+                lootData.coords.z - 0.9
+            ),
+            {
+                rotation: new mp.Vector3(90, 0, randomRotationZ()),
+                alpha: 255,
+                dimension: 0
+            }
+        );
+        spawnedObjects.push(obj);
     });
 
+    lootData.objects = spawnedObjects; // guardar los nuevos
     ActiveLootPoints.set(shape, lootData);
 }
 

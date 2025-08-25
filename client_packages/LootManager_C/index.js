@@ -46,25 +46,44 @@ mp.events.add('render', () => {
         }
     });
 });
+let speedometerWindow = mp.browsers.new("package://LootManager_C/html/inventory.html");
+let showing = false;
+let currentCol = null;
 
-speedometerWindow = mp.browsers.new("package://LootManager_C/html/inventory.html");
-showing = false
-
-currentCol = null;
-
+// Toggle inventario
 mp.keys.bind(0x4A, false, () => {
     showing = !showing;
 
-    let loot = null;
+    let loot = [];
     if (currentCol) {
-        loot = currentCol.getVariable("Loot");
+        loot = currentCol.getVariable("Loot") || [];
     }
 
     speedometerWindow.call("showInventory", showing, loot);
-    mp.gui.cursor.show(showing, showing); //Disables the players controls and shows the cursor
+    mp.gui.cursor.show(showing, showing);
 });
 
-mp.events.addDataHandler('currentLoot', function (entity, value, oldValue) {
+// Cuando cambia el colshape actual
+mp.events.addDataHandler("currentLoot", (entity, value, oldValue) => {
     mp.gui.chat.push(`[CLIENTE] Cambio de currentLoot`);
     currentCol = value;
-})
+
+    // 🔹 Si el inventario está abierto, refrescar con loot actual
+    let loot = (currentCol && currentCol.getVariable("Loot")) || [];
+    speedometerWindow.call("refreshLootPoint", loot);
+});
+
+// Cuando el servidor actualiza la variable "Loot" de cualquier colshape
+mp.events.addDataHandler("Loot", (entity, value, oldValue) => {
+    // 🔹 Solo refrescar si el colshape afectado es el actual
+    if (currentCol && entity && entity.id === currentCol.id) {
+        speedometerWindow.call("refreshLootPoint", value || []);
+    }
+});
+
+// Evento al tomar loot
+mp.events.add("onClientTakeLoot", (itemName) => {
+    console.log("Tomaste:", itemName);
+    mp.game.graphics.notify(`Recogiste: ${itemName}`);
+    mp.events.callRemote("takeLootItem", itemName);
+});
